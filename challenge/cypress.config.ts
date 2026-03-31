@@ -6,5 +6,11 @@ export default defineConfig({
     specPattern: "cypress/e2e/**/*.cy.{js,ts,jsx,tsx}",
     supportFile: "cypress/support/e2e.ts",
   },
-});
 
+  component: {
+    devServer: {
+      framework: "react",
+      bundler: "webpack",
+    },
+  },
+});
