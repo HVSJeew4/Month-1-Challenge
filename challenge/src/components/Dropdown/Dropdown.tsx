@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useEffect, useId, useRef, useState } from "react";
 
 interface DropdownItem {
   value: string;
@@ -22,13 +22,25 @@ export function Dropdown({
 }: DropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const dropdownLabelId = useId();
+  const selectedIndex = items.findIndex((item) => item.value === value);
+  const [activeIndex, setActiveIndex] = useState(0);
 
   const selectedItem = items.find((item) => item.value === value);
+
+  const closeDropdown = () => {
+    setIsOpen(false);
+  };
+
+  const openDropdown = () => {
+    setActiveIndex(selectedIndex >= 0 ? selectedIndex : 0);
+    setIsOpen(true);
+  };
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (ref.current && !ref.current.contains(e.target as Node)) {
-        setIsOpen(false);
+        closeDropdown();
       }
     };
 
@@ -38,22 +50,54 @@ export function Dropdown({
 
   const handleSelect = (itemValue: string) => {
     onChange?.(itemValue);
-    setIsOpen(false);
+    closeDropdown();
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
+    const hasItems = items.length > 0;
+
+    if (e.key === "Escape") {
+      e.preventDefault();
+      closeDropdown();
+      return;
+    }
+
     if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
-      setIsOpen(!isOpen);
+      if (!isOpen) {
+        openDropdown();
+        return;
+      }
+      if (!hasItems) return;
+      const itemAtActive = items[activeIndex];
+      if (itemAtActive) handleSelect(itemAtActive.value);
+      return;
     }
-    if (e.key === "Escape") {
-      setIsOpen(false);
+
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      if (!isOpen) openDropdown();
+      if (!hasItems) return;
+      setActiveIndex((i) => (i + 1) % items.length);
+      return;
+    }
+
+    if (e.key === "ArrowUp") {
+      e.preventDefault();
+      if (!isOpen) openDropdown();
+      if (!hasItems) return;
+      setActiveIndex((i) => (i - 1 + items.length) % items.length);
+      return;
     }
   };
 
   return (
     <div className="dropdown" ref={ref}>
-      {label && <span className="dropdown-label">{label}</span>}
+      {label && (
+        <span id={dropdownLabelId} className="dropdown-label">
+          {label}
+        </span>
+      )}
       <div
         className={`dropdown-trigger ${isOpen ? "dropdown-open" : ""}`}
         onClick={() => setIsOpen(!isOpen)}
@@ -61,6 +105,7 @@ export function Dropdown({
         role="combobox"
         aria-expanded={isOpen}
         aria-haspopup="listbox"
+        aria-labelledby={label ? dropdownLabelId : undefined}
         tabIndex={0}
       >
         {selectedItem ? selectedItem.label : placeholder}

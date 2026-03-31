@@ -1,4 +1,4 @@
-import { ChangeEvent, FocusEvent } from "react";
+import { ChangeEvent, FocusEvent, useId } from "react";
 
 interface InputProps {
   value?: string;
@@ -23,31 +23,38 @@ export function Input({
   onFocus,
   onBlur,
 }: InputProps) {
-  const id = label ? `input-${label.toLowerCase().replace(/\s+/g, "-")}` : undefined;
+  const reactId = useId();
+  const inputId = label
+    ? `input-${label.toLowerCase().replace(/\s+/g, "-")}`
+    : reactId;
 
   return (
     <div className="input-group">
       {label && (
-        <label htmlFor={id} className="input-label">
+        <label htmlFor={inputId} className="input-label">
           {label}
           {required && <span className="input-required"> *</span>}
         </label>
       )}
       <input
-        id={id}
+        id={inputId}
         className={`input ${error ? "input-error" : ""}`}
         type={type}
-        value={value}
+        value={value ?? ""}
         onChange={onChange}
         placeholder={placeholder}
         required={required}
         onFocus={onFocus}
         onBlur={onBlur}
         aria-invalid={!!error}
-        aria-describedby={error ? `${id}-error` : undefined}
+        aria-describedby={error ? `${inputId}-error` : undefined}
       />
       {error && (
-        <span id={`${id}-error`} className="input-error-text" role="alert">
+        <span
+          id={`${inputId}-error`}
+          className="input-error-text"
+          role="alert"
+        >
           {error}
         </span>
       )}

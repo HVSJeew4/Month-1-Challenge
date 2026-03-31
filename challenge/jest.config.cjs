@@ -6,7 +6,10 @@ module.exports = {
     "^.+\\.(t|j)sx?$": ["ts-jest", { tsconfig: "<rootDir>/tsconfig.json" }],
   },
   moduleFileExtensions: ["ts", "tsx", "js", "jsx", "json"],
-  testMatch: ["**/?(*.)+(test|spec).[tj]sx?"],
+  testMatch: [
+    "**/__tests__/**/*.[jt]s?(x)",
+    "**/?(*.)+(spec|test).[tj]s?(x)",
+  ],
   collectCoverage: true,
   collectCoverageFrom: [
     "src/**/*.{ts,tsx,js,jsx}",
